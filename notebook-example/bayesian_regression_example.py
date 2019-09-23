@@ -1,13 +1,14 @@
 # To add a new cell, type '#%%'
 # To add a new markdown cell, type '#%% [markdown]'
-#%% Change working directory from the workspace root to the ipynb file location. Turn this addition off with the DataScience.changeDirOnImportExport setting
-# ms-python.python added
+#%% Change working directory from the workspace root to the ipynb file
+# location. Turn this addition off with the
+# DataScience.changeDirOnImportExport setting ms-python.python added
 import os
 try:
-	os.chdir(os.path.join(os.getcwd(), 'notebook-example'))
-	print(os.getcwd())
+    os.chdir(os.path.join(os.getcwd(), 'notebook-example'))
+    print(os.getcwd())
 except:
-	pass
+    pass
 #%%
 from IPython import get_ipython
 
@@ -73,7 +74,6 @@ train = torch.tensor(df.values, dtype=torch.float)
 
 is_cont_africa, ruggedness, log_gdp = train[:, 0], train[:, 1], train[:, 2]
 
-
 #%%
 def model(is_cont_africa, ruggedness, log_gdp):
     beta_0 = pyro.sample("beta_0", dist.Normal(0, 1))
@@ -82,7 +82,7 @@ def model(is_cont_africa, ruggedness, log_gdp):
     beta_3 = pyro.sample("beta_3", dist.Normal(0, 1))
     
     sigma = pyro.sample("sigma", dist.Gamma(1, 1))
-    mean = beta_0 +            beta_1 * is_cont_africa +            beta_2 * ruggedness +            beta_3 * is_cont_africa * ruggedness
+    mean = beta_0 + beta_1 * is_cont_africa + beta_2 * ruggedness + beta_3 * is_cont_africa * ruggedness
     
     with pyro.plate("data", len(log_gdp)):
         y = pyro.sample("obs", dist.Normal(mean, sigma), obs=log_gdp)
