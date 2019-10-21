@@ -85,6 +85,9 @@ ENV/
 # vs code editor
 .vscode/
 
+# notebook examples file
+notebook-example/
+
 # Spyder project settings
 .spyderproject
 
