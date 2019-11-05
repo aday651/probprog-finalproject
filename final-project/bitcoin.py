@@ -48,15 +48,23 @@ class BitcoinOTC(object):
             in_degree = [0 for i in range(self.num_nodes)]
             out_weights = [[] for i in range(self.num_nodes)]
             in_weights = [[] for i in range(self.num_nodes)]
-            time_ratings = [[] for i in range(self.num_nodes)]
+            time_in_ratings = [[] for i in range(self.num_nodes)]
+            time_out_ratings = [[] for i in range(self.num_nodes)]
 
             for line in data:
                 out_degree[int(line[0])-1] += 1
                 in_degree[int(line[1])-1] += 1
-                out_weights[int(line[0])-1].append(float(line[2]))
-                in_weights[int(line[1])-1].append(float(line[2]))
-                time_ratings[int(line[0])-1].append(
-                    (int(float(line[3])) - time_stamp.min())/86400
+                out_weights[int(line[0])-1].append(
+                    (float(line[2])+10)/20
+                )
+                in_weights[int(line[1])-1].append(
+                    (float(line[2])+10)/20
+                )
+                time_in_ratings[int(line[0])-1].append(
+                    float(line[3])/86400
+                )
+                time_out_ratings[int(line[1])-1].append(
+                    float(line[3])/86400
                 )
 
             self.out_degree = torch.tensor(out_degree, dtype=torch.float)
@@ -77,8 +85,12 @@ class BitcoinOTC(object):
                 [np.std(item) for item in in_weights],
                 dtype=torch.float
             )
-            self.rate_time_std = torch.tensor(
-                [np.std(time_ratings) for item in time_ratings],
+            self.rate_time_out_std = torch.tensor(
+                [np.std(item) for item in time_out_ratings],
+                dtype=torch.float
+            )
+            self.rate_time_in_std = torch.tensor(
+                [np.std(item) for item in time_in_ratings],
                 dtype=torch.float
             )
 
@@ -97,12 +109,12 @@ class BitcoinOTC(object):
             self.gt = torch.tensor(gt, dtype=torch.float)
 
             # Create test/train splits
-            self.nodes_with_gr = np.array([int(line[0]) for line in data])
+            self.nodes_with_gt = np.array([int(line[0])-1 for line in data])
             self.nodes_train = np.random.choice(
-                self.nodes_with_gr,
+                self.nodes_with_gt,
                 size=self.train_num,
                 replace=False
             )
             self.nodes_test = np.setdiff1d(
-                self.nodes_with_gr, self.nodes_train
+                self.nodes_with_gt, self.nodes_train
             )
