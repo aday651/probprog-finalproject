@@ -5,11 +5,12 @@ from bitcoin import BitcoinOTC
 
 
 # Converting torch tensors to numpy arrays...
-def plot_summary_stat(fname='img/summary_stat.png', display=False):
+def plot_summary_stat(fname=None, display=False):
     r""" Plots summary statistics of the Bitcoin OTC dataset.
 
     Args:
-        fname (str, optional) : Path/filename to save the plot.
+        fname (str, optional) : Path/filename to save the plot. If fname = None
+            the plot is not displayed.
         display (bool, optional) : Determines whether the plot is displayed.
     """
     data = BitcoinOTC()
@@ -77,7 +78,8 @@ def plot_summary_stat(fname='img/summary_stat.png', display=False):
             ax.set_xlim(xlim_list[i])
             ax.legend(loc='upper right')
 
-    plt.savefig(fname, bbox_inches='tight')
+    if fname is not None:
+        plt.savefig(fname, bbox_inches='tight')
 
     if display:
         plt.show()
