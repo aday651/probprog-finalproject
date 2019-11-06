@@ -106,7 +106,7 @@ class BitcoinOTC(object):
                     gt[int(line[0])-1] = 1
                 else:
                     gt[int(line[0])-1] = 0
-            self.gt = torch.tensor(gt, dtype=torch.float)
+            self.gt = torch.tensor(gt, dtype=torch.long)
 
             # Create test/train splits
             self.nodes_with_gt = np.array([int(line[0])-1 for line in data])
@@ -118,3 +118,5 @@ class BitcoinOTC(object):
             self.nodes_test = np.setdiff1d(
                 self.nodes_with_gt, self.nodes_train
             )
+            self.nodes_train = self.nodes_train.tolist()
+            self.nodes_test = self.nodes_test.tolist()
