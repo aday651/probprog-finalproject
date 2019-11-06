@@ -12,6 +12,8 @@ def plot_summary_stat(fname=None, display=False):
         fname (str, optional) : Path/filename to save the plot. If fname = None
             the plot is not displayed.
         display (bool, optional) : Determines whether the plot is displayed.
+    Returns:
+        None
     """
     data = BitcoinOTC()
     out_degree = data.out_degree.numpy()

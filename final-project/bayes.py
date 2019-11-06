@@ -8,16 +8,20 @@ import pandas as pd
 
 
 def bayes_logistic_reg(model_num=1, num_samples=1000, warmup_steps=200):
-    r"""Implements the logistic regression model described in section
-    'Model 1: A straightforward Bayesian logistic regression'.
+    r"""Implements the logistic regression models described in the report
+    writeup.
 
     Args:
-        model_num (int, optional) - Specifies the model we want to fit. If
+        model_num (int, optional) : Specifies the model we want to fit. If
             this isn't equal to 1 or 2, there'll be an error somewhere.
-        num_samples (int, optional) - The number of draws from the posterior
+        num_samples (int, optional) : The number of draws from the posterior
             to sample from via MCMC.
-        warmup_steps (int, optional) - The number of steps used as part of
+        warmup_steps (int, optional) : The number of steps used as part of
             the warmup phase in order to tune the underlying MCMC algorithm.
+    Returns:
+        hmc_samples (dict) : Returns a dictionary with keys corresponding to
+            the names of the parameters, whose items are ndarray's of length
+            num_samples.
     """
 
     # Define the model
@@ -91,8 +95,5 @@ def bayes_logistic_reg(model_num=1, num_samples=1000, warmup_steps=200):
         print("Site: {}".format(site))
         print(values, "\n")
 
-    gt_labels = {'train': data.gt[data.nodes_train].numpy(),
-                 'test': data.gt[data.nodes_test].numpy()}
-
     # Return samples from MCMC to use further
-    return gt_labels, hmc_samples
+    return hmc_samples
