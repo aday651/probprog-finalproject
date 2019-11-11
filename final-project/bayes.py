@@ -26,12 +26,13 @@ def bayes_logistic_reg(model_num=1, num_samples=1000, warmup_steps=200):
 
     # Define the model
     def model_1(r, sdg, sdr, sdt, gt):
+        mu = pyro.sample("mu", dist.Normal(0, 10))
         beta_r = pyro.sample("beta_r", dist.Normal(0, 1))
         beta_sdg = pyro.sample("beta_sdg", dist.Normal(0, 1))
         beta_sdr = pyro.sample("beta_sdr", dist.Normal(0, 1))
         beta_sdt = pyro.sample("beta_sdt", dist.Normal(0, 1))
 
-        log_prob = beta_r*r + beta_sdg*sdg + beta_sdr*sdr + beta_sdt*sdt
+        log_prob = mu + beta_r*r + beta_sdg*sdg + beta_sdr*sdr + beta_sdt*sdt
 
         with pyro.plate("data", len(gt)):
             y = pyro.sample("obs", dist.Bernoulli(logits=log_prob), obs=gt)
@@ -39,12 +40,13 @@ def bayes_logistic_reg(model_num=1, num_samples=1000, warmup_steps=200):
         return y
 
     def model_2(r, sdg, sdr, sdt, gt):
+        mu = pyro.sample("mu", dist.Normal(0, 10))
         beta_r = pyro.sample("beta_r", dist.Normal(0, 1))
         beta_rsdg = pyro.sample("beta_rsdg", dist.Normal(0, 1))
         beta_rsdr = pyro.sample("beta_rsdr", dist.Normal(0, 1))
         beta_rsdt = pyro.sample("beta_rsdt", dist.Normal(0, 1))
 
-        log_prob = beta_r*r + beta_rsdg*r*sdg + beta_rsdr*r*sdr + \
+        log_prob = mu + beta_r*r + beta_rsdg*r*sdg + beta_rsdr*r*sdr + \
             beta_rsdt*r*sdt
 
         with pyro.plate("data", len(gt)):
@@ -90,6 +92,9 @@ def bayes_logistic_reg(model_num=1, num_samples=1000, warmup_steps=200):
 
     hmc_samples = {k: v.detach().cpu().numpy() for
                    k, v in mcmc.get_samples().items()}
+
+    for key in hmc_samples:
+        hmc_samples[key] = hmc_samples[key][-num_samples:]
 
     for site, values in summary(hmc_samples).items():
         print("Site: {}".format(site))

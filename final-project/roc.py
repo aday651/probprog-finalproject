@@ -26,12 +26,13 @@ def plot_roc_curve(gt, logits, fname=None, display=False):
         return np.exp(x)/(1+np.exp(x))
 
     # Keeping track of ROC and AOC values, storing e.g colours
-    num_of_samples = logits['train'].shape(1)
+    num_of_samples = logits['train'].shape[1]
     color_dict = {'train': '#0173B2', 'test': '#D55E00'}
     aoc_dict = {'train': [], 'test': []}
 
     # Figure plotting
-    plt.figure(figsize=(10, 10))
+    plt.ioff()
+    plt.figure(figsize=(10, 8))
 
     # For training and test sets,
     for key in ['train', 'test']:
@@ -45,7 +46,7 @@ def plot_roc_curve(gt, logits, fname=None, display=False):
             aoc_dict[key].append(auc(fpr, tpr))
 
             if i % 20 == 0:
-                plt.plot(fpr, tpr, color=color_dict[key], lw=2, alpha=0.3)
+                plt.plot(fpr, tpr, color=color_dict[key], lw=2, alpha=0.1)
 
         # Plot posterior mean for train/test, give AOC with +\- std
         fpr, tpr, _ = roc_curve(
@@ -53,14 +54,14 @@ def plot_roc_curve(gt, logits, fname=None, display=False):
             y_score=sigmoid(np.mean(logits[key], axis=1))
         )
 
-        label = r'{} AOC: {} $\pm$ {}'.format(
+        label = r'{} AOC: {:.4f} $\pm$ {:.4f}'.format(
             key, np.mean(aoc_dict[key]), np.std(aoc_dict[key])
         )
-        plt.plot(fpr, tpr, color=color_dict[key], lw=3, label=label)
+        plt.plot(fpr, tpr, color=color_dict[key], lw=4, label=label)
 
     # Add axis labels, plot/save the figure
     plt.plot([0, 1], [0, 1], color='#949494', lw=3, linestyle='--')
-    plt.xlim([0.0, 1.02])
+    plt.xlim([0.0, 1])
     plt.ylim([0.0, 1.02])
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')

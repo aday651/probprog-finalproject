@@ -16,7 +16,7 @@ class BitcoinOTC(object):
             for the train and test splits for the nodes.
     """
 
-    def __init__(self, train_num=200, rng_seed=651):
+    def __init__(self, train_num=158, rng_seed=651):
         self.train_num = train_num
         self.rng_seed = rng_seed
         np.random.seed(rng_seed)
