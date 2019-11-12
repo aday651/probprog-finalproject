@@ -73,3 +73,5 @@ def plot_roc_curve(gt, logits, fname=None, display=False):
 
     if display:
         plt.show()
+
+    plt.close()

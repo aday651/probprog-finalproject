@@ -9,7 +9,7 @@ class BitcoinOTC(object):
     to whether the underlying user is trustworthy; None is used to indicate
     that there is no a-priori information
 
-    Args:
+    Attributes:
         train_num (int, optional) : The number of nodes used to form the train
             and test data split for the per node trustworthiness ratings.
         rng_seed (int, optional) : The seed used to randomly select indices
@@ -17,9 +17,67 @@ class BitcoinOTC(object):
     """
 
     def __init__(self, train_num=158, rng_seed=651):
+        r"""
+        The constructor for the BitcoinOTC class.
+
+        Parameters:
+           train_num (int): The number of training samples to take from the
+                labelled part of the dataset. Should be between 1 and 315.
+                Defaults to 158 (=50% of the dataset).
+            rng_seed (int): Set the rng seed to create the test/train split.
+                If None, then the default seeding is used.
+            edge_index (LongTensor): Lists the edges in the
+                BitcoinOTC network, has shape [2, num of edges].
+            num_nodes (int): Number of nodes in the network.
+            edge_weight (Tensor): Gives weights of edges corresponding to each
+                edge of edge_index, has shape [2, num of edges].
+            time_stamp (Tensor): Gives the time in days the edge was formed,
+                from the time at which the first edge was created. Has shape
+                [2, num of edges].
+            out_degree (Tensor): Gives the out degree of each node. Has shape
+                [num_nodes].
+            in_degree (Tensor): Gives the in degree of each node. Has shape
+                [num_nodes].
+            out_weight_avg (Tensor): Gives the average of the out weights to
+                a node. Has shape [num_nodes]. Equals nan if the
+                corresponding out_degree equals zero.
+            out_weight_std (Tensor): Gives the standard deviation of the out
+                weights to a node. Has shape [num_nodes]. Equals zero if the
+                corresponding out_degree equals one; equals nan if the
+                corresponding out_degree equals zero.
+            in_weight_avg (Tensor): Gives the average of the in weights to
+                a node. Has shape [num_nodes]. Equals nan if the
+                corresponding out_degree equals zero.
+            in_weight_std (Tensor): Gives the standard deviation of the in
+                weights to a node. Has shape [num_nodes]. Equals zero if the
+                corresponding out_degree equals one; equals nan if the
+                corresponding out_degree equals zero.
+            rate_time_out_std (Tensor): Gives the standard deviation of the
+                rating times for the edges leaving a node.
+                Has shape [num_nodes]. Equals zero if the corresponding
+                out_degree equals one; equals nan if the corresponding
+                out_degree equals zero.
+            rate_time_in_std (Tensor): Gives the standard deviation of the
+                rating times for the edges entering a node.
+                Has shape [num_nodes]. Equals zero if the corresponding
+                out_degree equals one; equals nan if the corresponding
+                out_degree equals zero.
+            gt (Tensor): Denotes whether a node corresponds to a trustworthy
+                user (=1), a not trustworthy user (=0), or the latent state
+                is unknown (=nan). Has shape [num_nodes]
+            nodes_with_gt (list): Lists the nodes for which we know the
+            underlying latent state. Has shape [316].
+            nodes_train (list)): Lists nodes corresponding to the training data
+            split. Has shape [train_num].
+            nodes_test (list): Lists nodes corresponding to the test data
+            split. Has shape [316 - train_num].
+        """
+
         self.train_num = train_num
         self.rng_seed = rng_seed
-        np.random.seed(rng_seed)
+
+        if rng_seed is not None:
+            np.random.seed(rng_seed)
 
         # Read edge information
         with open('data/otc_network.csv', 'r') as f:
@@ -118,5 +176,6 @@ class BitcoinOTC(object):
             self.nodes_test = np.setdiff1d(
                 self.nodes_with_gt, self.nodes_train
             )
+            self.nodes_with_gt = self.nodes_with_gt.tolist()
             self.nodes_train = self.nodes_train.tolist()
             self.nodes_test = self.nodes_test.tolist()

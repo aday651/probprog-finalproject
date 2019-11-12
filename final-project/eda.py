@@ -81,7 +81,9 @@ def plot_summary_stat(fname=None, display=False):
             ax.legend(loc='upper right')
 
     if fname is not None:
-        plt.savefig(fname, bbox_inches='tight')
+        f.savefig(fname, bbox_inches='tight')
 
     if display:
         plt.show()
+
+    plt.close()
