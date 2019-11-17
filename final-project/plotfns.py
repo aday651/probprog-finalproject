@@ -50,7 +50,8 @@ def plot_calibration_curve(gt, logits, fname=None, display=False):
         sigmoid(np.mean(logits['test'], axis=1)),
         n_bins=10)
     plt.plot(mean_pred, frac_positive,
-             's-', color='#0173B2', label='Logistic regression')
+             's-', color='#0173B2',
+             label='Estimated probabilities (test set)')
 
     plt.scatter(sigmoid(np.mean(logits['test'], axis=1)), gt['test'],
                 color='k', marker='|')
@@ -96,7 +97,6 @@ def plot_roc_curve(gt, logits, fname=None, display=False):
     aoc_dict = {'train': [], 'test': []}
 
     # Figure plotting
-    plt.ioff()
     plt.figure(figsize=(10, 8))
 
     # For training and test sets,
@@ -183,13 +183,13 @@ def plot_logit_distribution(gt, pop_logits, train_set,
     plt.hlines(0, 0, 1, color='#949494', lw=3, linestyle='--', alpha=0.5)
     plt.hlines(1, 0, 1, color='#949494', lw=3, linestyle='--', alpha=0.5)
 
+    plt.scatter(sigmoid(pop_logits_mean[test_set]),
+                gt[test_set].numpy(),
+                color='#cc78bc', marker='*', lw=2, alpha=0.5)
+
     plt.scatter(sigmoid(pop_logits_mean[train_set]),
                 gt[train_set].numpy(),
                 color='k', marker='|', lw=2)
-
-    plt.scatter(sigmoid(pop_logits_mean[test_set]),
-                gt[test_set].numpy(),
-                color='#cc78bc', marker='*', lw=2)
 
     plt.xlim([-0.05, 1.05])
     plt.ylim([-0.05, 1.05])
