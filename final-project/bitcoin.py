@@ -32,6 +32,9 @@ class BitcoinOTC(object):
             num_edges (int): Number of edges in the network.
             edge_weight (Tensor): Gives weights of edges corresponding to each
                 edge of edge_index, has shape [num of edges].
+            edge_weight_logit (Tensor): Gives weights of edges on a logit
+                scale, corresponding to each edge of edge_index, has shape
+                [num of edges].
             time_stamp (Tensor): Gives the time in days the edge was formed,
                 from the time at which the first edge was created. Has shape
                 [2, num of edges].
@@ -97,9 +100,14 @@ class BitcoinOTC(object):
             self.num_nodes = edge_index.max().item() + 1
             self.num_edges = self.edge_index.shape[1]
 
-            # Create edge weights, transform to lie in [0, 1]
+            # Create edge weights, transform to lie in [0, 1], along with
+            # a logit scaled version
             edge_weight = [(float(line[2])+10)/20 for line in data]
             self.edge_weight = torch.tensor(edge_weight, dtype=torch.float)
+            self.edge_weight_logit = 0.05 + 0.9*self.edge_weight
+            self.edge_weight_logit = torch.log(
+                self.edge_weight_logit/(1 - self.edge_weight_logit)
+            )
 
             # Create time stamps for edges, transform to be in terms of
             # days after the first transaction on the network
