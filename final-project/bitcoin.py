@@ -321,6 +321,7 @@ class BitcoinOTC(object):
         walks = random_walk(row=self.edge_index[0, self.edges_pos_degree_mask],
                             col=self.edge_index[1, self.edges_pos_degree_mask],
                             start=start_loc,
+                            num_nodes=self.num_nodes,
                             walk_length=walk_length,
                             coalesced=True)
 

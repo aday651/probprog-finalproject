@@ -1,3 +1,5 @@
+import time
+import logging
 import torch
 import pyro
 import pyro.distributions as dist
@@ -34,6 +36,9 @@ def embed(data, embed_args_dict, sample_args_dict):
                 somewhere.
             learning_rate (float): Learning rate for the ADAM optimizer.
             num_iters (int): Number of iterations to perform SVI.
+            logging (bool): If True, then ELBO updates and the time ellapsed
+                are output every 500 iterations, unless num_iters <= 1000
+                in which case it is set to 100.
 
         sample_args_dict (dict): A dictionary with handles the subsampling
             procedure used on the data object. Check the docstring for the
@@ -49,6 +54,16 @@ def embed(data, embed_args_dict, sample_args_dict):
     obs_scale = embed_args_dict['obs_scale']
     learning_rate = embed_args_dict['learning_rate']
     num_iters = embed_args_dict['num_iters']
+    logging_ind = embed_args_dict['logging']
+
+    # Set logging printing rate
+    if (num_iters > 1000):
+        log_update = 500
+    else:
+        log_update = 100
+
+    # Make sure logging actually works
+    logging.basicConfig(format='%(message)s', level=logging.INFO)
 
     # Define guide object for embedding model
     def guide(data, node_ind, edge_ind, edge_list):
@@ -60,8 +75,10 @@ def embed(data, embed_args_dict, sample_args_dict):
         # Parameters governing the priors on the embedding vectors
         # omega_loc should have shape [embed_dum, data.num_nodes]
         omega_loc = pyro.param('omega_loc',
-                               lambda: 0.5*torch.randn(embed_dim,
-                                                       data.num_nodes))
+                               lambda: torch.randn(
+                                   embed_dim, data.num_nodes
+                               )/np.sqrt(embed_dim)
+                               )
         # omega_scale should be a single positive tensor
         omega_scale = pyro.param('omega_scale',
                                  torch.tensor(1.0),
@@ -202,10 +219,10 @@ def embed(data, embed_args_dict, sample_args_dict):
         # formed by omega. Note that to extract the relevant indices,
         # we need to account for the change in indexing induced by
         # subsampling omega
-        gram_pos = torch.mm(omega[:(embed_dim/2), :].t(),
-                            omega[:(embed_dim/2), :])
-        gram_neg = torch.mm(omega[(embed_dim/2):, :].t(),
-                            omega[(embed_dim/2):, :])
+        gram_pos = torch.mm(omega[:int(embed_dim/2), :].t(),
+                            omega[:int(embed_dim/2), :])
+        gram_neg = torch.mm(omega[int(embed_dim/2):, :].t(),
+                            omega[int(embed_dim/2):, :])
         gram = gram_pos - gram_neg
         gram_sample = gram[t[edge_list[0, :]], t[edge_list[0, :]]]
 
@@ -225,9 +242,45 @@ def embed(data, embed_args_dict, sample_args_dict):
                   loss=TraceGraph_ELBO())
 
     # Begin optimization
-    for i in range(num_iters):
-        subsample_dict = data.subsample(**sample_args_dict)
-        svi.step(data, **subsample_dict)
+    # Keep track of time/optizing if desired
+    if logging_ind:
+        time_store = []
+        t0 = time.time()
+        elbo = []
 
-    # Extract the variational parameters and return the approximate posterior
-    # mean logits to use somewhere else
+    pyro.clear_param_store()
+    for i in range(num_iters):
+        # Really bad error handling for when the subsampling code for the
+        # random walk decides to break
+        count = 0
+        while (count < 20):
+            try:
+                subsample_dict = data.subsample(**sample_args_dict)
+                count = 30
+            except IndexError:
+                count += 1
+
+        elbo_val = svi.step(data, **subsample_dict)
+        if logging_ind & (i % log_update == 0) & (i > 0):
+            elbo.append(elbo_val)
+            t1 = time.time()
+            time_store.append(t1-t0)
+            logging.info('Elbo loss: {}'.format(elbo_val))
+            logging.info('Expected completion time: {}s'.format(
+                int(np.average(time_store)*(num_iters - i)/log_update)
+            ))
+            t0 = time.time()
+
+    # Extract the variational parameters and return them
+    vp_dict = {}
+    vp_dict['mu_loc'] = pyro.param('mu_loc')
+    vp_dict['beta_loc'] = pyro.param('beta_loc')
+    vp_dict['omega_loc'] = pyro.param('omega_loc')
+    vp_dict['mu_scale'] = pyro.param('mu_scale')
+    vp_dict['beta_scale'] = pyro.param('beta_scale')
+    vp_dict['omega_scale'] = pyro.param('omega_scale')
+
+    if 'elbo' in locals():
+        return vp_dict, elbo
+    else:
+        return vp_dict
