@@ -31,7 +31,7 @@ def plot_calibration_curve(gt, logits, fname=None, display=False):
     """
 
     # Begin creating the plot
-    plt.figure(figsize=(10, 8))
+    plt.figure(figsize=(7, 5))
     plt.plot([0, 1], [0, 1], "k:", label="Perfectly calibrated")
 
     # Plot calibration curves for different draws from the posterior
@@ -97,7 +97,7 @@ def plot_roc_curve(gt, logits, fname=None, display=False):
     aoc_dict = {'train': [], 'test': []}
 
     # Figure plotting
-    plt.figure(figsize=(10, 8))
+    plt.figure(figsize=(7, 5))
 
     # For training and test sets,
     for key in ['train', 'test']:
@@ -167,7 +167,7 @@ def plot_logit_distribution(gt, pop_logits, train_set,
 
     pop_logits_mean = np.mean(pop_logits, axis=1)
 
-    plt.figure(figsize=(10, 8))
+    plt.figure(figsize=(7, 5))
 
     for i in range(pop_logits.shape[1]):
         if i % 20 == 0:
