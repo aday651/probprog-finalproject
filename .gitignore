@@ -91,6 +91,9 @@ ENV/
 # notebook examples file
 notebook-example/
 
+# test code folder
+test-code/
+
 # Spyder project settings
 .spyderproject
 

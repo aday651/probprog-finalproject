@@ -94,7 +94,7 @@ def embed(data, embed_args_dict, sample_args_dict):
                                 constraint=constraints.positive)
         # mu_loc should be a single tensor
         mu_loc = pyro.param('mu_loc',
-                            torch.randn(1))
+                            torch.tensor([0.0]))
         # mu_scale should be a single positive tensor
         mu_scale = pyro.param('mu_scale',
                               torch.tensor(1.0),

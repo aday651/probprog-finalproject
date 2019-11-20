@@ -3,11 +3,11 @@
 ## Summary of project
 
 The goal of the project is to try and perform accurate uncertainity quantification for 
-detecting whether users are trustworthy or not on a Bitcoin OTC platform.
+detecting whether users are trustworthy or not on a Bitcoin user platform.
 
 ## Data source
 
-The data comes from ratings between users on a Bitcoin OTC platform, and was obtained from 
+The data comes from ratings between users on a Bitcoin user platform, and was obtained from 
 the following [webpage](https://cs.stanford.edu/%7Esrijan/rev2/), which contains all
 the ratings between users in the network, and also some ground truth data. A full description
 is given in the project writeup, with a shorter description available on the 
